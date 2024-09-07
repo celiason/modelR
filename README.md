@@ -1,4 +1,4 @@
-# ModelR: optical models in R
+# modelR: optical models in R
 
 ## Introduction
 
