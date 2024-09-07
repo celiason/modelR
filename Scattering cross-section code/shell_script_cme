@@ -1,0 +1,56 @@
+# This code calculates the extinction, scattering and absorption cross-sections of 2d cylinder.
+# Code written by Bala krishna Juluri, http://juluribk.com, Feb 21, 2012
+
+# !/bin/bash
+
+# a: Normalization unit used in the simulation in m
+# fcen: Central frequency of Gaussian pulse in angular frequency units
+# df: Width of Gaussian pulse in the angular frequency units
+# Wavelength used in the simulation will be lam_min=a/(fcen+df/2) and lam_max=a/(fcen-df/2)
+# resl: Resolution used in meep code
+# aspect_ratio: Aspect ration of the structure/
+# Sample: controls the number of data points that are taken in one cycle of the code
+# N: Factor for the FFT points, higher the factor the smaller the frequency spacing (only used by the post-processing code and not by meep code).
+
+# A=100e-9
+RAD=.109
+RESL=120
+FCEN=3
+DF=4
+NFREQ=200
+SUB=2.43
+TE=false
+# clean=1
+
+# rm *.h5
+# rm *.png
+# rm *.gif
+
+# Calculate the files with no structure (base simulation)
+meep resl=$RESL rad=$RAD ra=0 fcen=$FCEN df=$DF TE?=$TE nfreq=$NFREQ sub=$SUB structure?=false scattering?=true hollow_tube_scat.ctl |tee nostructure.out
+grep flux1: nostructure.out >incident_flux.dat
+sed -i'.bak' 's/flux1:, / /g' incident_flux.dat
+
+# Calcualtes the files with the structure
+meep resl=$RESL rad=$RAD ra=0 fcen=$FCEN df=$DF TE?=$TE nfreq=$NFREQ sub=$SUB structure?=true scattering?=true hollow_tube_scat.ctl |tee structure_scat.out
+grep flux1: structure_scat.out >trans_flux_structure_scat.dat
+sed -i'.bak' 's/flux1:, / /g' trans_flux_structure_scat.dat
+
+# Calcualtes the files with the structure
+meep resl=$RESL rad=$RAD ra=0 fcen=$FCEN df=$DF TE?=$TE nfreq=$NFREQ sub=$SUB structure?=true scattering?=false hollow_tube_scat.ctl |tee structure_abs.out
+grep flux1: structure_abs.out >trans_flux_structure_abs.dat
+sed -i'.bak' 's/flux1:, / /g' trans_flux_structure_abs.dat
+
+# make output files
+# h5topng -t 0:100 -S3 -Rc -dkbluered hollow_tube_scat-Hz.h5  
+# convert *.png Hz_movie.gif
+# rm *.png
+
+# h5topng -t 0:100 -S3 -Rc -dkbluered hollow_tube_scat-Ez.h5  
+# convert *.png Ez_movie.gif
+# rm *.png
+
+# if clean==1; then
+# rm *.dat
+# rm *.out
+# rm *.h5 

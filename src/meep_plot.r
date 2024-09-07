@@ -1,0 +1,15 @@
+# Make R script to find flux data and plot
+initial.dir <- getwd()
+setwd("/Users/chad/MEEP code/src")
+struc0 <- read.csv("flux0.dat", head=F)
+struc1 <- read.csv("flux1.dat", head=F)
+wl <- (1/struc0[, 2]) * 1000
+refl <- -1*(struc1[, 4]/struc0[, 3])
+# X11()
+pdf(file="output/RPlot.pdf")
+plot(refl~wl, type='l', xlim = c(300, 1000))
+lines(loess.smooth(x = wl, y = refl, span = .15), col = "red")
+dev.off()
+# message("Press Return To Continue")
+# invisible(readLines("stdin", n=1))
+setwd(initial.dir)

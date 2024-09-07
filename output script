@@ -1,0 +1,24 @@
+; MEEP density of states
+meep r=.09 scale=.09201 a=.2 n2=2 k2=0 rot=0 res=50 no-struc?=true aps2.ctl |tee struc0.out
+meep r=.09 scale=.09201 a=.2 n2=2 k2=0 rot=0 res=50 no-struc?=false aps2.ctl |tee struc1.out
+meep r=.09 scale=.09201 a=.2 n1=1.85 n2=1.85 k2=0 rot=0 res=50 no-struc?=false aps2.ctl |tee struc1.out  ; avg index
+;;; fix script to output different files depending on whether structure present/absent
+
+; simulate disorder in wild turkey feathers
+meep k1=0 k2=.01 rot=0 res=30 no-struc?=true disorder.ctl |tee struc0.out
+meep k1=0 k2=.01 rot=0 res=30 no-struc?=false disorder.ctl |tee struc1.out
+grep flux1: struc0.out > flux0.dat
+grep flux1: struc1.out > flux1.dat
+
+# IMPORT DATA FROM MEEP (LOCATED IN /CHAD FOLDER)
+struc0 <- read.csv("flux0.dat", head=F)
+struc1 <- read.csv("flux1.dat", head=F)
+wl <- (1/struc0[,2])*1000
+refl <- -1*(struc1[,4]/struc0[,3])
+trans <- struc1[,3]/struc0[,3]
+abso <- 1-(refl+trans)
+lines(refl~wl, type='l', xlim=c(250,2000), lty=4)
+#sims <- cbind(wl, refl)
+sims <- cbind(sims, refl)
+
+# Simulations for disorder (d) = 0,.01,.05,.10 where disorder sets the bounds of the random uniform noise added the the structure. e.g., if d=.1, then the radii of melanosomes (r_mel) would be r_mel + runif(r_mel +/- r_mel*d).
