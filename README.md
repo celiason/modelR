@@ -1,4 +1,4 @@
-# OptiModR: Optical models in R
+# ModeleR: Optical models in R
 
 ## Introduction
 
